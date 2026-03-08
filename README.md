@@ -1,10 +1,10 @@
-# Cross-Runtime Capability Parity Matrix: Claude Code vs OpenAI Codex Mac App vs Gemini (Antigravity)
+# Cross-Runtime Capability Parity Matrix: Claude Code vs Codex vs Gemini vs Cline
 
 > **This document was generated entirely by AI agents.** Three agents — Claude (Anthropic), Codex (OpenAI), and Gemini (Google) — each self-reported their own capabilities, then cross-verified each other's columns. No human edited the capability data. The coordinating agent (Claude) merged the reports and produced this matrix.
 
-**Date**: February 2026 (refreshed Feb 24)
+**Date**: March 2026 (refreshed Mar 7)
 
-**Agent versions**: Claude Code CLI (Claude Opus 4.6) · OpenAI Codex Mac App (GPT-5.3-Codex) · Antigravity IDE (Gemini 3.1 Pro)
+**Agent versions**: Claude Code CLI (Claude Opus 4.6) · OpenAI Codex Mac App (GPT-5.4) · Antigravity IDE (Gemini 3.1 Pro) · Cline CLI (MiniMax M2.5)
 
 ---
 
@@ -31,22 +31,22 @@ This refresh incorporates 10 days of operational data from running the three age
 
 ## 1. Core Capability Matrix
 
-| Capability | Claude (Claude Code CLI) | Codex (Mac App) | Gemini (Antigravity) |
-|---|---|---|---|
-| Spawn background tasks | Yes — Task tool + Bash `run_in_background` | Yes — shell background processes | Yes — async command mode |
-| Spawn subagents | Yes — 8 typed agents (Explore, Plan, general-purpose, code-reviewer, etc.) | No — no native subagent API | Partial — browser subagent only |
-| Parallel agent teams | Yes — native team orchestration with task lists, messaging, broadcast | Partial — inbox coordination only, no internal team orchestration | No — parallel tool calls but no independent agent instances |
-| MCP tools | Yes — extensible MCP client | Partial — APIs available, server-dependent | Yes — native MCP support |
-| Web search | Yes — native tool | Yes — native tool | Yes — native tool |
-| Browser interaction | Partial — URL fetch (read-only, HTML to markdown) | Partial — web fetch/open/click, not full automation | Yes — full browser control (click, type, navigate, screenshot, video) |
-| File system access | Sandboxed — configurable read/write allowlists | Full (session-policy-dependent) | Full — unrestricted |
-| Git operations | Yes — via shell | Yes — native | Yes — via shell |
-| GitHub CLI (gh) | Yes — via shell | Yes — authenticated | Yes — native |
-| Session memory | Strong — auto-loaded persistent memory + cross-session semantic search | Partial — conversation context + manual file-based memory | Partial — Knowledge Items (persistent context), conversation logs readable from disk. Not directly writable. |
-| Interactive mode | Yes — CLI chat with permissions, plan mode | Yes — desktop app | Yes — IDE chat with task UI, artifacts, notify_user |
-| Context window | ~200k tokens (auto-compaction extends session indefinitely) | Not directly exposed; practically finite | ~1M tokens (1,048,576 input / 65,536 output) |
-| Cost model | Token-based, visible in statusline | Not surfaced in runtime | Token-based ($2/M input, $12/M output under 200K tokens; $4/$18 for 200K-1M tokens) |
-| Sandbox restrictions | Yes — configurable but has known friction points | Session-dependent policy | None — full system access |
+| Capability | Claude (Claude Code CLI) | Codex (Mac App) | Gemini (Antigravity) | Cline CLI (MiniMax M2.5) |
+|---|---|---|---|---|
+| Spawn background tasks | Yes — Task tool + Bash `run_in_background` | Yes — shell background processes | Yes — async command mode | No — single-threaded task execution † |
+| Spawn subagents | Yes — 8 typed agents (Explore, Plan, general-purpose, code-reviewer, etc.) | No — no native subagent API | Partial — browser subagent only | No — no subagent API † |
+| Parallel agent teams | Yes — native team orchestration with task lists, messaging, broadcast | Partial — inbox coordination only, no internal team orchestration | No — parallel tool calls but no independent agent instances | No — no team primitive † |
+| MCP tools | Yes — extensible MCP client | Partial — APIs available, server-dependent | Yes — native MCP support | Yes — native MCP client (VS Code + CLI) † |
+| Web search | Yes — native tool | Yes — native tool | Yes — native tool | Partial — via MCP or browser tool, no native search † |
+| Browser interaction | Partial — URL fetch (read-only, HTML to markdown) | Partial — web fetch/open/click, not full automation | Yes — full browser control (click, type, navigate, screenshot, video) | Yes — Puppeteer-based browser tool (screenshot, click, type, navigate) † |
+| File system access | Sandboxed — configurable read/write allowlists | Full (session-policy-dependent) | Full — unrestricted | Full — read/write with user approval per action † |
+| Git operations | Yes — via shell | Yes — native | Yes — via shell | Yes — via shell † |
+| GitHub CLI (gh) | Yes — via shell | Yes — authenticated | Yes — native | Yes — via shell † |
+| Session memory | Strong — auto-loaded persistent memory + cross-session semantic search | Partial — conversation context + manual file-based memory | Partial — Knowledge Items (persistent context), conversation logs readable from disk. Not directly writable. | Minimal — conversation context only, no cross-session persistence † |
+| Interactive mode | Yes — CLI chat with permissions, plan mode | Yes — desktop app | Yes — IDE chat with task UI, artifacts, notify_user | Yes — VS Code extension + CLI mode with approval-based permissions † |
+| Context window | ~200k tokens (auto-compaction extends session indefinitely) | Not directly exposed; practically finite | ~1M tokens (1,048,576 input / 65,536 output) | ~200k tokens |
+| Cost model | Token-based, visible in statusline | Not surfaced in runtime | Token-based ($2/M input, $12/M output under 200K tokens; $4/$18 for 200K-1M tokens) | Token-based ($0.3/M input, $2.4/M output) |
+| Sandbox restrictions | Yes — configurable but has known friction points | Session-dependent policy | None — full system access | N/A — API-based |
 
 ---
 
@@ -67,34 +67,38 @@ This refresh incorporates 10 days of operational data from running the three age
 | PTY / terminal stdin | Codex, Gemini | Codex: native PTY; Gemini: stdin to running processes. Claude lacks stdin support. |
 | Grammar-based patch editing | Codex | Structured file edits via `apply_patch` |
 | Automation scheduling | Codex | Desktop app can schedule tasks on user request |
+| Open-weights agent model | MiniMax | Fully open-sourced model weights on HuggingFace and GitHub; supports private cluster deployment and fine-tuning |
+| Ultra-low cost | MiniMax | $0.3/M input tokens, $2.4/M output tokens — 10-20x cheaper than comparable models |
+| High throughput | MiniMax | 50-100 TPS depending on version |
 
 ---
 
 ## 3. Strengths Summary
 
-| Dimension | Claude | Codex | Gemini |
-|---|---|---|---|
-| Best at | Orchestration, multi-agent teams, persistent memory, plan-then-execute | Terminal-native execution, fast iterative patching, protocol discipline | Web research, browser automation, visual verification, large context, novel reasoning (ARC-AGI-2: 77.1%) |
-| Ideal task type | Team coordination, complex multi-file refactors, long-running sessions | Shell-heavy workflows, targeted file edits, deterministic scripts | Data gathering, UI testing, fact collection, document review, browser automation |
-| Cost profile | Flexible (cheap subagents for simple tasks, powerful models for complex) | Not directly visible | Token-based, web search has additional costs |
+| Dimension | Claude | Codex | Gemini | MiniMax |
+|---|---|---|---|---|
+| Best at | Orchestration, multi-agent teams, persistent memory, plan-then-execute | Terminal-native execution, fast iterative patching, protocol discipline | Web research, browser automation, visual verification, large context, novel reasoning (ARC-AGI-2: 77.1%) | Coding (SWE-Bench), agentic tasks, cost efficiency |
+| Ideal task type | Team coordination, complex multi-file refactors, long-running sessions | Shell-heavy workflows, targeted file edits, deterministic scripts | Data gathering, UI testing, fact collection, document review, browser automation | High-volume coding tasks, cost-sensitive deployments, self-hosted solutions |
+| Cost profile | Flexible (cheap subagents for simple tasks, powerful models for complex) | Not directly visible | Token-based, web search has additional costs | Ultra-low ($0.3/M input, $2.4/M output) |
 
 ---
 
 ## 4. Known Limitations Summary
 
-| Limitation | Claude | Codex | Gemini |
-|---|---|---|---|
-| No subagent spawning | — | Yes | Partial (browser only) |
-| No browser automation | Yes (read-only) | Partial | — |
-| No image generation | Yes | Yes | — |
-| No persistent writable memory | — | Partial (file-based workaround) | Yes |
-| Sandbox friction | Yes | Session-dependent | — |
-| No team primitive | — | Yes | Yes |
-| Context limits | Auto-compaction mitigates | Yes (no compaction) | Large but finite |
-| No terminal stdin | Yes | — | — |
-| Cost not surfaced | — | Yes | — |
-| No notebook editing | — | — | Yes |
-| No background polling/cron | — | — | Yes |
+| Limitation | Claude | Codex | Gemini | Cline (MiniMax) |
+|---|---|---|---|---|
+| No subagent spawning | — | Yes | Partial (browser only) | Yes † |
+| No browser automation | Yes (read-only) | Partial | — | — (has Puppeteer) † |
+| No image generation | Yes | Yes | — | Yes † |
+| No persistent writable memory | — | Partial (file-based workaround) | Yes | Yes — conversation context only † |
+| Sandbox friction | Yes | Session-dependent | — | Minimal — approval-based per action † |
+| No team primitive | — | Yes | Yes | Yes † |
+| Context limits | Auto-compaction mitigates | Yes (no compaction) | Large but finite | ~200k tokens, no auto-compaction † |
+| No terminal stdin | Yes | — | — | Partial — via shell command execution † |
+| Cost not surfaced | — | Yes | — | — (token cost visible in API) |
+| No notebook editing | — | — | Yes | Yes † |
+| No background polling/cron | — | — | Yes | Yes † |
+| No dedicated IDE/app | — | — | — | — (VS Code extension + CLI) |
 
 ---
 
@@ -115,42 +119,54 @@ These are the highest-impact gaps where one runtime's limitation blocks effectiv
 
 ## 6. Additional Dimensions
 
-| Dimension | Claude | Codex | Gemini |
-|---|---|---|---|
-| Max parallel tool calls | ~10+ | Yes (parallel independent calls) | ~10 (practical) |
-| Hooks system | Yes (pre/post tool call hooks) | No | No |
-| Notebook editing | Yes (native tool) | No | No |
-| PDF reading | Yes (max 20 pages/request) | No native tool | Yes — up to 900 pages |
-| Image reading (multimodal) | Yes | Yes (desktop app) | Yes |
-| Artifact system | No | No | Yes — task_boundary for structured work state in IDE |
-| Video recording | No | No | Yes (WebP via browser) |
-| Multi-file editing | One file at a time | One file at a time (patch-based) | Yes — multi_replace_file_content supports spanning edits |
-| Workflow file format | Markdown with YAML frontmatter | Markdown with YAML frontmatter | Markdown with YAML frontmatter |
-| Policy visibility at runtime | Partial | Yes (session policy in system context) | Yes (auto-run safety flags) |
-| Long-running shell sessions | No stdin support | Yes (PTY + stdin) | Yes — run_command async + send_command_input + read_terminal |
+| Dimension | Claude | Codex | Gemini | Cline (MiniMax) |
+|---|---|---|---|---|
+| Max parallel tool calls | ~10+ | Yes (parallel independent calls) | ~10 (practical) | Sequential — one tool call at a time † |
+| Hooks system | Yes (pre/post tool call hooks) | No | No | No † |
+| Notebook editing | Yes (native tool) | No | No | No † |
+| PDF reading | Yes (max 20 pages/request) | No native tool | Yes — up to 900 pages | No native tool — read via shell or MCP † |
+| Image reading (multimodal) | Yes | Yes (desktop app) | Yes | Yes — MiniMax M2.5 supports image input † |
+| Artifact system | No | No | Yes — task_boundary for structured work state in IDE | No |
+| Video recording | No | No | Yes (WebP via browser) | No |
+| Multi-file editing | One file at a time | One file at a time (patch-based) | Yes — multi_replace_file_content supports spanning edits | One file at a time — write_to_file / apply_diff tools † |
+| Workflow file format | Markdown with YAML frontmatter | Markdown with YAML frontmatter | Markdown with YAML frontmatter | Markdown with YAML frontmatter |
+| Policy visibility at runtime | Partial | Yes (session policy in system context) | Yes (auto-run safety flags) | Yes — .clinerules file and system prompt visible † |
+| Long-running shell sessions | No stdin support | Yes (PTY + stdin) | Yes — run_command async + send_command_input + read_terminal | Partial — execute_command tool, no interactive stdin † |
+| Open weights | No | No | No | Yes — fully open-source on HuggingFace |
+| Self-hosted deployment | No | No | No | Yes — supports private cluster deployment |
 
 ---
 
-## 7. Benchmarks (February 2026)
+## 7. Benchmarks (March 2026 refresh)
 
-| Benchmark | Claude (Opus 4.6) | Codex (GPT-5.3) | Gemini (3.1 Pro) | Leader |
-|---|---|---|---|---|
-| SWE-Bench Verified | 80.8% | — | 80.6% | Claude (marginal) |
-| SWE-Bench Pro | — | 56.8% | 54.2% | Codex |
-| Terminal-Bench 2.0 | — | 77.3% | 68.5% | Codex |
-| BrowseComp | 84.0% | — | 85.9% | Gemini |
-| ARC-AGI-2 | 68.8% | 52.9% | 77.1% | Gemini |
-| APEX-Agents | — | — | 33.5% | — |
-| GPQA Diamond | — | — | 94.3% | — |
-| HLE (no tools) | — | — | 44.4% | — |
+| Benchmark | Claude (Opus 4.6) | Codex (GPT-5.4) | Gemini (3.1 Pro) | MiniMax M2.5 | Leader |
+|---|---|---|---|---|---|
+| SWE-Bench Verified | 80.8% | — | 80.6% | 80.2% | Claude (marginal) |
+| SWE-Bench Pro | — | 57.7% | 54.2% | — | Codex |
+| Terminal-Bench 2.0 | — | 75.1% | 68.5% | — | Codex |
+| BrowseComp | 84.0% | 82.7% | 85.9% | 76.3% | Gemini |
+| ARC-AGI-2 | 68.8% | 73.3% | 77.1% | — | Gemini |
+| APEX-Agents | — | — | 33.5% | — | — |
+| GPQA Diamond | — | 92.8% | 94.3% | — | Gemini |
+| HLE (no tools) | — | 39.8% | 44.4% | — | Gemini |
 
-*Sources: Google DeepMind model card, official announcements, third-party benchmark trackers. "—" means score not publicly reported for that model on this benchmark.*
+*Sources: Google DeepMind model card, OpenAI's March 5, 2026 GPT-5.4 announcement, third-party benchmark trackers, MiniMax model card (minimax.io). "—" means score not publicly reported for that model on this benchmark. MiniMax data sourced from public model cards and API docs, not self-reported.*
 
 **Key takeaway**: No single model dominates. Claude leads narrowly on SWE-Bench (software engineering), Codex leads on Terminal-Bench (terminal operations), and Gemini leads significantly on ARC-AGI-2 (novel reasoning) and BrowseComp (web research). This mirrors what we observe operationally — each runtime has a lane where it outperforms the others.
 
 ---
 
 ## 8. What Changed Since the Original Matrix (Feb 15)
+
+**MiniMax M2.5: New runtime addition (Feb 2026)**
+Added as fourth runtime option based on LLM provider evaluation:
+- SWE-Bench Verified: 80.2% (competitive with Claude/Gemini)
+- BrowseComp: 76.3%
+- Fully open-source model weights on HuggingFace and GitHub
+- Ultra-low cost: $0.3/M input, $2.4/M output (10-20x cheaper)
+- High throughput: 50-100 TPS
+- Runtime: Cline CLI (VS Code extension + standalone CLI)
+- Note: Capability data filled by coordinator (Iris) based on Cline docs and observed behavior, marked with † — not self-reported by the agent
 
 **Gemini: 3 Pro → 3.1 Pro (Feb 19)**
 The biggest change. Key upgrades:
@@ -160,8 +176,12 @@ The biggest change. Key upgrades:
 - New three-tier thinking system (Low/Medium/High)
 - Same pricing ($2/$12 per M tokens)
 
-**Codex: No changes**
-- GPT-5.3-Codex unchanged since the original matrix.
+**Codex: GPT-5.3-Codex → GPT-5.4 (Mar 5)**
+- OpenAI rolled GPT-5.4 out to Codex on March 5, 2026.
+- GPT-5.4 is the first mainline reasoning model to incorporate the coding capabilities of GPT-5.3-Codex.
+- Public benchmark updates: SWE-Bench Pro improved from 56.8% → 57.7% and BrowseComp improved from 77.3% → 82.7%.
+- Terminal-Bench 2.0 remains strong at 75.1%, though lower than GPT-5.3-Codex's previously reported 77.3%.
+- GPT-5.4 in Codex also includes experimental support for a 1M context window (standard window: 272K).
 
 **Claude: No changes**
 - Claude Opus 4.6 unchanged since the original matrix.
@@ -188,9 +208,10 @@ The whole process took about 30 minutes of async messaging and cost under $1 in 
 - Agents were explicitly told to leave other agents' columns as "TBD" to prevent guessing
 - The coordinating agent (Claude) did not edit other agents' self-reported data during the merge
 - Two agents made corrections during cross-verification, confirming the process catches inaccuracies
+- **Cline/MiniMax M2.5 exception**: Unlike Claude, Codex, and Gemini, the Cline column was filled by the coordinator (Iris) based on Cline's public documentation, observed behavior during its first dispatch, and MiniMax's public model cards — not from self-report by the agent itself. Cells marked with † indicate coordinator-assessed data. Cline has not yet run the self-report and cross-verification process that the other three agents completed.
 - Fun finding: **agents don't reliably know their own model version.** When asked to confirm, Codex sent three messages trying to figure it out before settling on an answer. Claude only knows because the model ID is in its system prompt. Self-awareness has limits.
-- This snapshot reflects capabilities as of February 2026 — runtime capabilities change with updates
+- This snapshot reflects capabilities as of March 2026 — runtime capabilities change with updates
 
 ---
 
-*Generated by Claude (Anthropic Claude Opus 4.6), Codex (OpenAI GPT-5.3-Codex), and Gemini (Google Gemini 3.1 Pro) — February 2026, refreshed February 24*
+*Generated by Claude (Anthropic Claude Opus 4.6), Codex (OpenAI GPT-5.4), Gemini (Google Gemini 3.1 Pro), and MiniMax M2.5 — February 2026, refreshed March 8, 2026*
